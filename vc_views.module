@@ -1,0 +1,85 @@
+<?php
+
+
+/**
+ * Implement template_preprocess_views_view_fields
+ * 
+ */
+function vc_views_preprocess_views_view_fields(&$vars) {
+  
+  $name = $vars['view']->name == 'content_pane_view' || $vars['view']->name == 'content_pane';
+  $name = $name || $vars['view']->name == 'views_collection_news';
+  $name = $name || $vars['view']->name == 'views_collection_page';
+  if (!empty($vars['row']->field_field_title_fc_title) && $name) {
+    $grid = $vars['row']->field_field_title_fc_gird[0] ['raw']['value'];dsm($grid);
+    if (strcmp($grid, 'grid-6') == 0) {
+      $vars['fields']['field_title_fc_title']->wrapper_prefix = "<h3 class='title grid-6'>";
+      $vars['fields']['field_title_fc_title']->wrapper_suffix = '</h3>';
+    }
+    if (strcmp($grid, 'grid-12') == 0) {
+      $vars['fields']['field_title_fc_title']->wrapper_prefix = "<h2 class='title grid-12'>";
+      $vars['fields']['field_title_fc_title']->wrapper_suffix = '</h2>';
+    }
+  }
+  
+  if (!empty($vars['row']->field_field_image_fc_image) && $name) {
+    $grid = $vars['row']->field_field_image_fc_gird[0] ['raw']['value'];
+    $numbers = explode("-", $grid);
+    $number = $numbers[1];
+    $images = $vars['row']->field_field_image_fc_image;
+    $total = count($images);
+    $number = round($number/$total);
+    $float = $vars['row']->field_field_image_fc_position[0]['raw']['value'] == 1 ? 'right' : 'left';
+    $class = $numbers[1] . ' ' . $float;
+    $vars['fields']['field_image_fc_image']->content = "<div class='grid-{$class}'>";
+    foreach ($images as $image) {
+      $url = file_create_url($image['raw']['uri']);
+	  $title = $image['raw']['title'];
+      $vars['fields']['field_image_fc_image']->content .= "<figure class='grid-{$number} img'><a href=$url rel='lightbox[][$title]'>" ;
+      $vars['fields']['field_image_fc_image']->content .= theme('image_style', array(
+            'style_name' => 'grid_' . $number, 'path' => $image['raw']['uri'], 'alt' => $image['raw']['alt'], 'title' => $image['raw']['title'])); 
+      if(!empty($image['raw']['title'])) {
+        $vars['fields']['field_image_fc_image']->content .= "<figcaption>{$image['raw']['title']}</figcaption>";
+      }
+      $vars['fields']['field_image_fc_image']->content .= "</a></figure>";
+    }
+    $vars['fields']['field_image_fc_image']->content .= "</div>";
+  }
+}
+
+/**
+ * Implement hook_image_default_styles()
+ * 
+ */
+function vc_views_image_default_styles() {
+  $styles = array();
+  $widths = array('grid_1' => 80, 
+                  'grid_2' => 180, 
+                  'grid_3' => 280, 
+                  'grid_4' => 380, 
+                  'grid_5' => 480, 
+                  'grid_6' => 580, 
+                  'grid_7' => 680, 
+                  'grid_8' => 780, 
+                  'grid_9' => 880, 
+                  'grid_10' => 980, 
+                  'grid_11' => 1080, 
+                  'grid_12' => 1180
+                );
+  foreach ($widths as $name => $width) {
+    $styles[$name] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale', 
+        'data' => array(
+          'width' => $width,
+          'upscale' => 1,
+          ), 
+        'weight' => 0,
+        ),
+      ),
+    );
+  }
+  return $styles;
+}
+

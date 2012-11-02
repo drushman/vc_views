@@ -1,0 +1,4 @@
+name = Vietcoop Views Collection field
+description = Define image style follow grid 12 system and set out image in colletion field follow this styles
+package = Vietcoop
+core = 7.x
